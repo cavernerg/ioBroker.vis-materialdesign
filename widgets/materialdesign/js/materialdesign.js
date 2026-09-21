@@ -32,7 +32,6 @@ vis.binds.materialdesign = {
             myMdwHelper.getVersion(function (version) {
                 console.log('Version vis-materialdesign: ' + version);
 
-                myMdwHelper.initializeSentry(version);
             });
         });
     },

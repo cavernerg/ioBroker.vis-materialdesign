@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "vis-materialdesign",
-        "version": "0.5.9",
+        "version": "0.5.10",
         "news": {
+            "0.5.10": {
+              "en": "Slim fork: unused widgets and their libraries removed (see README)",
+              "de": "Schlanker Fork: nicht genutzte Widgets und deren Bibliotheken entfernt (siehe README)"
+            },
             "0.5.9": {
                 "en": "* Top App Bar Widget: option added to define navigation items per JSON String [Details see documentation!](https://github.com/Scrounger/ioBroker.vis-materialdesign#top-app-bar)\n* Top App Bar Widget: option added to define an id per item\n* fixed bugs found by sentry\n\n<!-- omit in toc -->",
                 "de": "* Top App Bar Widget: Option hinzugefügt, um Navigationselemente pro JSON-String zu definieren [Details siehe Dokumentation!](https://github.com/Scrounger/ioBroker.vis-materialdesign#top-app-bar)\n* Top App Bar Widget: Option hinzugefügt, um eine ID pro Element zu definieren\n* Fehler behoben, die von Wache gefunden wurden\n\n<!-- im Inhaltsverzeichnis weglassen -->",
