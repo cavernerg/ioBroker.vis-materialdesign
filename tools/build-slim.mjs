@@ -18,11 +18,18 @@
  *      Implementierung nicht mehr mitgebaut wird.
  *   4. js/materialdesign.js: den Sentry-Aufruf entfernen.
  *
- * Der Build ist idempotent: er liest immer die unveraenderten Quellen unter
- * lib/ und js/widgets/ und schreibt nur die Artefakte neu.
+ * Der Build ist idempotent: Eingabe sind immer die unveraenderten Quellen
+ * (lib/*.js, js/widgets/*.js und tools/materialdesign.src.html), Ausgabe sind
+ * nur die Artefakte. widgets/materialdesign.html ist ein Erzeugnis und darf
+ * nicht von Hand bearbeitet werden — sonst ist die naechste Aenderung an
+ * KEEP_WIDGETS wirkungslos, weil die entfernten Templates schon fehlen.
  *
- * Aufruf:  node tools/build-slim.mjs [--check]
+ * Nach einem Merge von Upstream: `node tools/build-slim.mjs --adopt` uebernimmt
+ * das gemergte widgets/materialdesign.html als neue Quelle und baut danach neu.
+ *
+ * Aufruf:  node tools/build-slim.mjs [--check|--adopt]
  *   --check  nur pruefen und Groessen melden, nichts schreiben
+ *   --adopt  widgets/materialdesign.html -> tools/materialdesign.src.html
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -32,6 +39,7 @@ import { createRequire } from 'node:module';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const W = path.join(ROOT, 'widgets', 'materialdesign');
 const CHECK = process.argv.includes('--check');
+const ADOPT = process.argv.includes('--adopt');
 
 // esbuild wird nicht als devDependency gefuehrt, damit `npm i` des Adapters
 // schlank bleibt; auf dem ioBroker-Host liegt es ohnehin unter node_modules.
@@ -53,6 +61,7 @@ const KEEP_WIDGETS = [
     'materialdesign.button.js',             // Button-* und Icon-Button-*
     'materialdesign.topappbarnav.js',       // TopAppBar-Navigation
     'materialdesign.dialog.js',             // Vuetify-Dialog-View / -iFrame
+    'materialdesign.card.js',               // Card - steckt im Projekt-Template "Button Licht"
     'materialdesign.viseditor.js'           // Attribut-Editor im vis-Editor
 ];
 
@@ -149,9 +158,17 @@ for (const lib of DROP_LIBS) {
 /* ----------------------------------- 3) materialdesign.html zurechtstutzen */
 
 const htmlPath = path.join(ROOT, 'widgets', 'materialdesign.html');
-const htmlOrig = fs.readFileSync(htmlPath, 'utf8');
-const eol = htmlOrig.includes('\r\n') ? '\r\n' : '\n';
-let html = htmlOrig;
+// Quelle ist die unveraenderte Upstream-Fassung, NICHT das eigene Erzeugnis.
+const srcPath = path.join(ROOT, 'tools', 'materialdesign.src.html');
+if (ADOPT) {
+    fs.copyFileSync(htmlPath, srcPath);
+    console.log('--adopt: widgets/materialdesign.html als neue Quelle uebernommen');
+}
+if (!fs.existsSync(srcPath)) {
+    throw new Error(`${path.relative(ROOT, srcPath)} fehlt. Einmalig anlegen:\n` +
+        '  git show <upstream-tag>:widgets/materialdesign.html > tools/materialdesign.src.html');
+}
+let html = fs.readFileSync(srcPath, 'utf8');
 
 for (const tag of DROP_TAGS) {
     const re = new RegExp(`^[ \\t]*<script[^>]*src="widgets/materialdesign/${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*>\\s*</script>[ \\t]*\\r?\\n`, 'm');
@@ -177,6 +194,8 @@ console.log(`materialdesign.html: ${behalten.length} Templates bleiben, ${entfer
 
 /* -------------------------------------- 4) Sentry-Aufruf aus dem Bootstrap */
 
+// js/materialdesign.js wird nur um eine Zeile gekuerzt; das ist in beide
+// Richtungen erkennbar und braucht deshalb keine eigene Quelldatei.
 const mdPath = path.join(W, 'js', 'materialdesign.js');
 const mdOrig = fs.readFileSync(mdPath, 'utf8');
 const sentryRe = /^[ \t]*myMdwHelper\.initializeSentry\(version\);[ \t]*\r?\n/m;

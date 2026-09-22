@@ -18,13 +18,13 @@ Latenz) kostete das Widget-Set **2068 ms von 3532 ms** bis `DOMContentLoaded` �
 |---|---|
 | Bibliotheken in `lib.min.js` | `Chart.js`, `chartjs-plugin-datalabels.js`, `chroma.js`, `math.js` |
 | Widget-Implementierungen in `js/widgets.min.js` | alles außer `00.helper`, `00.vue.helper`, `materialdesignicons`, `button`, `topappbarnav`, `dialog`, `viseditor` |
-| Templates in `materialdesign.html` | 23 von 47 (Charts, Tabelle, Liste, Icon-List, Eingabefelder, Select, Switch, CheckBox, Slider, Progress, Card, Alerts, Calendar, Grid-/Masonry-Views, ColorScheme-Preview, value) |
+| Templates in `materialdesign.html` | 22 von 47 (Charts, Tabelle, Liste, Icon-List, Eingabefelder, Select, Switch, CheckBox, Slider, Progress, Alerts, Calendar, Grid-/Masonry-Views, ColorScheme-Preview, value) |
 | `<script src>` in `materialdesign.html` | die drei Sentry-Bündel, das zweite `moment-with-locales` (vis lädt im `<head>` bereits dasselbe moment 2.19.1), `round-slider.js` |
 | `js/materialdesign.js` | der Aufruf `myMdwHelper.initializeSentry(version)` |
 
-**Es bleiben 24 Widgettypen:** alle `Button-*` und `Icon-Button-*` (je 6 Varianten,
-waagerecht und senkrecht), `Icon`, `TopAppBar-Navigation`, `Vuetify-Dialog-View`,
-`Vuetify-Dialog-iFrame`, `Installed-Version`.
+**Es bleiben 25 Widgettypen:** alle `Button-*` und `Icon-Button-*` (je 6 Varianten,
+waagerecht und senkrecht), `Card`, `Icon`, `TopAppBar-Navigation`,
+`Vuetify-Dialog-View`, `Vuetify-Dialog-iFrame`, `Installed-Version`.
 
 Die CSS-Dateien sind unverändert — dort ist wenig zu holen, und das Risiko für das
 Layout wäre höher als der Gewinn.
@@ -45,16 +45,25 @@ Auslieferungsgrößen (gzip): `lib.min.js` 497 → 307 KiB, `js/widgets.min.js`
 ```bash
 node tools/build-slim.mjs --check   # nur prüfen, nichts schreiben
 node tools/build-slim.mjs           # Artefakte neu schreiben
+node tools/build-slim.mjs --adopt   # nach einem Upstream-Merge, siehe unten
 ```
 
-Das Skript liest immer die unveränderten Quellen unter `widgets/materialdesign/lib/`
-und `widgets/materialdesign/js/widgets/` und schreibt daraus `lib.min.js`,
-`js/widgets.min.js`, `widgets/materialdesign.html` und `js/materialdesign.js` neu.
-Es bricht ab, wenn eine behaltene Datei oder ein behaltenes Template auf etwas
-Entferntes verweist. Minifiziert wird mit esbuild.
+Eingabe sind ausschließlich unveränderte Quellen: `widgets/materialdesign/lib/*.js`,
+`widgets/materialdesign/js/widgets/*.js` und **`tools/materialdesign.src.html`** —
+die unangetastete Upstream-Fassung des Widget-Set-HTML. Ausgabe sind `lib.min.js`,
+`js/widgets.min.js`, `widgets/materialdesign.html` und `js/materialdesign.js`.
+Das Skript bricht ab, wenn eine behaltene Datei oder ein behaltenes Template auf
+etwas Entferntes verweist. Minifiziert wird mit esbuild.
 
-**Nach einem Merge von Upstream muss `tools/build-slim.mjs` erneut laufen**, sonst
-stehen die Originalartefakte wieder im Baum.
+`widgets/materialdesign.html` ist damit ein **Erzeugnis und nicht von Hand zu
+bearbeiten**: wer dort etwas ändert, verliert es beim nächsten Build — und wer ein
+Widget wieder in `KEEP_WIDGETS` aufnimmt, bekommt sein Template nur zurück, weil die
+Quelle noch alle 47 enthält.
+
+**Nach einem Merge von Upstream:** erst `widgets/materialdesign.html` auf den
+gemergten Upstream-Stand bringen (bei einem Konflikt „theirs" nehmen), dann
+`node tools/build-slim.mjs --adopt` — das übernimmt die Datei als neue Quelle und
+baut anschließend neu.
 
 ## Zurück auf Upstream
 

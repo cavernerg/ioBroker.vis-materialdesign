@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "vis-materialdesign",
-        "version": "0.5.10",
+        "version": "0.5.11",
         "news": {
+            "0.5.11": {
+              "en": "Card widget kept again (used by a project template)",
+              "de": "Card-Widget wieder enthalten (wird von einem Projekt-Template benutzt)"
+            },
             "0.5.10": {
               "en": "Slim fork: unused widgets and their libraries removed (see README)",
               "de": "Schlanker Fork: nicht genutzte Widgets und deren Bibliotheken entfernt (siehe README)"
